@@ -38,7 +38,7 @@ import genkit
 from genkit import ActionRunContext, MultipartToolResponse, Part, Tool
 from genkit._core._typing import Resource
 from genkit.plugin_api import Action
-from genkit_mcp._errors import _ToolResultError
+from genkit_mcp._errors import _ClientError, _ToolResultError
 
 McpToolCall = Callable[[str, dict[str, Any], dict[str, Any] | None], Awaitable[CallToolResult]]
 
@@ -267,18 +267,20 @@ def mcp_tools_to_actions(
         hand out.
 
     Raises:
-        ValueError: If two tools in the listing share a Genkit tool name once
-            the characters the model providers reject are rewritten.
+        GenkitError: ``INVALID_ARGUMENT`` if two tools in the listing share a
+            Genkit tool name once the characters the model providers reject
+            are rewritten.
     """
     actions: list[Action] = []
     server_tool_by_name: dict[str, str] = {}
     for tool in tools:
         action = mcp_tool_to_action(tool, prefix, call)
         if action.name in server_tool_by_name:
-            raise ValueError(
+            raise _ClientError(
                 f'MCP tools {server_tool_by_name[action.name]!r} and {tool.name!r} both map to the '
                 f'Genkit tool name {action.name!r} once the characters the model providers reject are '
-                'rewritten. Rename one of them on the server.'
+                'rewritten. Rename one of them on the server.',
+                status='INVALID_ARGUMENT',
             )
         server_tool_by_name[action.name] = tool.name
         actions.append(action)
@@ -304,8 +306,9 @@ def mcp_tools_to_handles(
         Handles in listing order.
 
     Raises:
-        ValueError: If two tools in the listing share a Genkit tool name once
-            the characters the model providers reject are rewritten.
+        GenkitError: ``INVALID_ARGUMENT`` if two tools in the listing share a
+            Genkit tool name once the characters the model providers reject
+            are rewritten.
     """
     actions = mcp_tools_to_actions(tools, prefix, call)
     return [Tool(action, original_output_schema=tool.outputSchema) for tool, action in zip(tools, actions, strict=True)]

@@ -689,10 +689,12 @@ async def test_tools_sharing_a_genkit_name_fail_the_listing(tmp_path: Path) -> N
     client = define_mcp_client(ai, 'bookshop', **server(tmp_path, MCP_FAKE_COLLIDING_TOOLS='1'))
     collision = r"MCP tools 'look\.up' and 'look/up' both map to the Genkit tool name 'bookshop_look_up'"
     try:
-        with pytest.raises(ValueError, match=collision):
+        with pytest.raises(GenkitError, match=collision) as listed:
             await client.get_active_tools()
-        with pytest.raises(ValueError, match=collision):
+        assert listed.value.status == 'INVALID_ARGUMENT'
+        with pytest.raises(GenkitError, match=collision) as expanded:
             await expand_wildcard_tools(ai._registry, ['bookshop:tool/*'])
+        assert expanded.value.status == 'INVALID_ARGUMENT'
     finally:
         await client.close()
 

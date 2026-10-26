@@ -37,7 +37,7 @@ from mcp.types import (
 from pydantic import AnyUrl
 from structlog.testing import capture_logs
 
-from genkit import Part
+from genkit import GenkitError, Part
 from genkit._core._typing import Resource
 from genkit.plugin_api import Action
 
@@ -373,5 +373,8 @@ def test_mcp_tools_to_actions_refuses_a_listing_whose_sanitised_names_collide() 
     """Two server tools which would answer to one Genkit name cannot both be handed out."""
     tools = [Tool(name='look.up', inputSchema={'type': 'object'}), Tool(name='look/up', inputSchema={'type': 'object'})]
 
-    with pytest.raises(ValueError, match="'look.up' and 'look/up' both map to the Genkit tool name 'catalog_look_up'"):
+    with pytest.raises(
+        GenkitError, match="'look.up' and 'look/up' both map to the Genkit tool name 'catalog_look_up'"
+    ) as refused:
         mcp_tools_to_actions(tools, 'catalog', no_content)
+    assert refused.value.status == 'INVALID_ARGUMENT'
