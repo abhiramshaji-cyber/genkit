@@ -158,8 +158,10 @@ class McpClient:
 
         Raises:
             GenkitError: ``FAILED_PRECONDITION`` if this client is closed,
-                ``UNAVAILABLE`` if the server cannot be started, or
-                ``DEADLINE_EXCEEDED`` if it does not answer in time.
+                ``UNAVAILABLE`` if the server cannot be started,
+                ``DEADLINE_EXCEEDED`` if it does not answer in time,
+                ``INTERNAL`` if it breaks the protocol, or the status for the
+                JSON-RPC error code it answers the listing with.
             ValueError: If two of the server's tools share a Genkit tool name
                 once the characters the model providers reject are rewritten.
         """
@@ -183,8 +185,10 @@ class McpClient:
 
         Raises:
             GenkitError: ``FAILED_PRECONDITION`` if this client is closed,
-                ``UNAVAILABLE`` if the server cannot be started, or
-                ``DEADLINE_EXCEEDED`` if it does not answer in time.
+                ``UNAVAILABLE`` if the server cannot be started,
+                ``DEADLINE_EXCEEDED`` if it does not answer in time,
+                ``INTERNAL`` if it breaks the protocol, or the status for the
+                JSON-RPC error code it answers the listing with.
             ValueError: If two of the server's tools share a Genkit tool name
                 once the characters the model providers reject are rewritten.
         """
