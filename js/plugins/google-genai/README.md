@@ -499,7 +499,7 @@ is, and the server returns an error if the model isn't available there. Interact
 by default (`store: false`), as with `googleAI`; set `config: { store: true }`
 (or `vertexAI({ store: true })` for every request) to store them and continue
 a conversation from the previous response's messages. On models that use
-`generateContent`, `store` is ignored with a warning. Unlike `googleAI`,
+`generateContent`, `store: true` is ignored with a warning. Unlike `googleAI`,
 `safetySettings` and `labels` are supported on these models.
 
 In a stateless conversation (`store: false`), earlier results of server-side

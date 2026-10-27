@@ -210,8 +210,8 @@ export const GeminiConfigSchema = GenerationCommonConfigSchema.extend({
     .boolean()
     .describe(
       'Whether to store the interaction for later retrieval. Defaults to ' +
-        'false. Only used by models on the Interactions API (ignored with ' +
-        'a warning on generateContent models).'
+        'false. Only used by models on the Interactions API (on ' +
+        'generateContent models, store: true is ignored with a warning).'
     )
     .optional(),
   previousInteractionId: z
@@ -1448,9 +1448,10 @@ export function defineModel(
         });
       }
 
-      // The platform's generateContent has no `store` field, so a `store` set
-      // either way (request config or plugin options) is ignored.
-      if ((storeFromConfig ?? pluginOptions?.store) !== undefined) {
+      // The platform's generateContent has no `store` field and never stores
+      // anything for later retrieval, so only `store: true` (request config
+      // or plugin options) asks for something that can't happen.
+      if ((storeFromConfig ?? pluginOptions?.store) === true) {
         warnDroppedConfigField(modelVersion, 'store');
       }
       // There's no stored conversation to continue on generateContent.
