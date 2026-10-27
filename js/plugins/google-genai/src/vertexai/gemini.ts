@@ -210,7 +210,8 @@ export const GeminiConfigSchema = GenerationCommonConfigSchema.extend({
     .boolean()
     .describe(
       'Whether to store the interaction for later retrieval. Defaults to ' +
-        'false. Only used by models on the Interactions API.'
+        'false. Only used by models on the Interactions API (ignored with ' +
+        'a warning on generateContent models).'
     )
     .optional(),
   previousInteractionId: z
@@ -1447,11 +1448,15 @@ export function defineModel(
         });
       }
 
-      // `store: false` is already how this model behaves, so only warn when
-      // something would actually be ignored.
-      if (storeFromConfig === true || previousInteractionIdFromConfig) {
+      // The platform's generateContent has no `store` field, so a `store` set
+      // either way (request config or plugin options) is ignored.
+      if ((storeFromConfig ?? pluginOptions?.store) !== undefined) {
+        warnDroppedConfigField(modelVersion, 'store');
+      }
+      // There's no stored conversation to continue on generateContent.
+      if (previousInteractionIdFromConfig) {
         logger.warn(
-          'store and previousInteractionId are not supported for this model and will be ignored.'
+          'previousInteractionId is not supported for this model and will be ignored.'
         );
       }
       if (videoFormatFromConfig !== undefined) {
